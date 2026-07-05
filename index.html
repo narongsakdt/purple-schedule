@@ -98,6 +98,10 @@
   #drop .sub { color:#7a7490; font-size:13px; margin-top:8px; }
   .privacy-note { margin:12px auto 0; max-width:680px; color:#5f5872;
     font-size:13px; line-height:1.45; text-align:center; }
+  .ios-ics-help { margin:10px auto 0; max-width:680px; color:#5f5872;
+    font-size:13px; line-height:1.45; }
+  .ios-ics-help p { margin:0 0 4px; font-weight:700; }
+  .ios-ics-help ol { margin:0; padding-left:22px; }
   input[type=file] { display:none; }
   #status { margin:16px 0; font-size:14px; min-height:20px; }
   #status.err { color:#c0264d; }
@@ -146,6 +150,13 @@
   <div id="status"></div>
   <button id="dl" class="btn" disabled>⬇︎ ดาวน์โหลด PNG</button>
   <button id="ics" class="btn" disabled>📅 ดาวน์โหลด ปฏิทิน (.ics)</button>
+  <div class="ios-ics-help">
+    <p>How to add .ics to iOS</p>
+    <ol>
+      <li>Save the .ics to Files.</li>
+      <li>In the Files app tap and hold the .ics file to grab it, then while still holding the file with one finger, switch to the Calendar app and drop the .ics file there.</li>
+    </ol>
+  </div>
   <div id="preview"></div>
 </main>
 
@@ -589,8 +600,8 @@ $("#ics").addEventListener("click", async () => {
     catch (e) { if (e && e.name === "AbortError") return; /* else fall through */ }
   }
 
-  // Otherwise download the .ics file. On iOS, tap the downloaded file
-  // (Safari Downloads ⌄ icon → the .ics) to open "Add All to Calendar".
+  // Otherwise download the .ics file. iOS import instructions are shown
+  // under the calendar button.
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url; a.download = currentICSName; a.click();

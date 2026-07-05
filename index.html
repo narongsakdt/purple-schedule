@@ -408,25 +408,34 @@ $("#dl").addEventListener("click", () => {
   a.href = currentDataURL; a.download = currentName; a.click();
 });
 
+const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent)
+  || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
 $("#ics").addEventListener("click", async () => {
   if (!currentICS) return;
   const blob = new Blob([currentICS], { type: "text/calendar;charset=utf-8" });
 
-  // Best path on iOS/mobile: native Share sheet with the .ics file → user
-  // picks Calendar. Requires a user gesture (this click) and https/localhost.
+  // Try the native Share sheet first (works on many mobile browsers).
   const file = new File([blob], currentICSName, { type: "text/calendar" });
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try { await navigator.share({ files: [file] }); return; }
     catch (e) { if (e && e.name === "AbortError") return; /* else fall through */ }
   }
 
-  // Desktop / fallback: normal file download.
   const url = URL.createObjectURL(blob);
+
+  // iOS Safari ignores blob "downloads" but WILL render an .ics opened in the
+  // tab as an "Add All to Calendar" screen. Navigate to it instead.
+  if (isIOS) {
+    window.location.href = url;
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    return;
+  }
+
+  // Desktop: normal file download.
   const a = document.createElement("a");
   a.href = url; a.download = currentICSName; a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-  // If the browser ignored the download (some in-app browsers), open it.
-  setTimeout(() => { try { window.location.href = url; } catch (_) {} }, 300);
 });
 </script>
 </body>

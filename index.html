@@ -25,7 +25,7 @@
   #status { margin:16px 0; font-size:14px; min-height:20px; }
   #status.err { color:#c0264d; }
   #status.ok { color:#1f8a4c; }
-  .btn { display:inline-block; margin-top:10px; padding:11px 20px; border:none;
+  .btn { display:block; margin:10px auto 0; padding:11px 20px; border:none;
          border-radius:10px; background:var(--purple); color:#fff; font-size:15px;
          cursor:pointer; }
   .btn:disabled { opacity:.4; cursor:default; }
@@ -40,19 +40,19 @@
 <body>
 <header>
   <h1>💜 Purple Schedule Maker</h1>
-  <p>Crew Schedule Slip PDF → purple-schedule PNG · runs entirely in your browser</p>
+  <p>แปลงไฟล์ PDF ตารางบินลูกเรือ → รูปภาพ PNG ตารางสีม่วง</p>
+  <p>แจ้งปัญหา (Bug Report): MS Team 45481 Narongsak D.</p>
 </header>
 <main>
   <label id="drop" for="file">
-    <div>Drop your <strong>Crew Schedule Slip PDF</strong> here</div>
-    <div class="sub">or tap to choose a file · nothing is uploaded, everything stays on your device</div>
+    <div>วางไฟล์ <strong>PDF </strong> ของคุณที่นี่</div>
+    <div class="sub">หรือแตะเพื่อเลือกไฟล์</div>
     <input type="file" id="file" accept="application/pdf">
   </label>
   <div id="status"></div>
-  <button id="dl" class="btn" disabled>⬇︎ Download PNG</button>
+  <button id="dl" class="btn" disabled>⬇︎ ดาวน์โหลด PNG</button>
   <div id="preview"></div>
 </main>
-<footer>All processing happens locally — your PDF never leaves this device.</footer>
 
 <div id="stageWrap"><div id="stage"></div></div>
 
@@ -114,15 +114,24 @@ async function extractWords(arrayBuffer) {
 // ---- parse (port of parse_pdf) ----
 function parse(words, text) {
   const meta = {};
-  let m = text.match(/PERS\.NO:\s*(\d+)\s+(\S+)\s+([A-Z ]+?)\s*\n/);
-  if (!m) throw new Error("Could not find PERS.NO / name line — is this the right PDF?");
+  const fail = (label) => {
+    const snip = text.slice(0, 600).replace(/\n/g, " ⏎ ");
+    throw new Error(`ไม่พบข้อมูล ${label} — ข้อความที่อ่านได้: ` + snip);
+  };
+  // name: <staffno> <category> <NAME>. Try the PERS.NO-prefixed form first;
+  // fall back to a bare "45481 SCC NARONGSAK DUANGTIP" match (the staff/name
+  // sometimes sit on the title line, not after the PERS.NO: label). The name
+  // class excludes newlines so it never bleeds into the next line.
+  let m = text.match(/PERS\.NO:\s*(\d+)\s+([A-Z]{1,4})\s+([A-Z][A-Z ]*[A-Z])/)
+       || text.match(/(\d{4,6})\s+([A-Z]{1,4})\s+([A-Z][A-Z ]*[A-Z])/);
+  if (!m) fail("PERS.NO / ชื่อ");
   meta.staff = m[1]; meta.category = m[2]; meta.name = m[3].trim();
   m = text.match(/A\/C QUAL:\s*([\d ]+?)\s*RANK:\s*(\S+)/);
-  if (!m) throw new Error("Could not find A/C QUAL / RANK line.");
+  if (!m) fail("A/C QUAL / RANK");
   meta.ac = m[1].trim().split(/\s+/).join(",");
   meta.rank = m[2];
   m = text.match(/EFFECTIVE:\s*\d{2}([A-Za-z]{3})(\d{2})/);
-  if (!m) throw new Error("Could not find EFFECTIVE date.");
+  if (!m) fail("EFFECTIVE");
   const mon = m[1][0].toUpperCase() + m[1].slice(1).toLowerCase();
   meta.month = MONTHS[mon]; meta.year = 2000 + parseInt(m[2], 10);
 
@@ -298,11 +307,11 @@ let currentDataURL = null, currentName = "purple_schedule.png";
 async function handleFile(file) {
   if (!file) return;
   $("#dl").disabled = true; $("#preview").innerHTML = ""; currentDataURL = null;
-  setStatus("Reading PDF…");
+  setStatus("กำลังอ่านไฟล์ PDF…");
   try {
     const buf = await file.arrayBuffer();
     const { words, text } = await extractWords(buf);
-    setStatus("Building schedule…");
+    setStatus("กำลังสร้างตาราง…");
     const { meta, duty, legs, dows, ndays } = parse(words, text);
     const days = composeDays(duty, legs, ndays);
     const { html, height } = renderHTML(meta, days, dows, ndays);

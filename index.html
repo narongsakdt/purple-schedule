@@ -24,6 +24,8 @@
   #drop.hover { border-color:var(--purple); background:#faf7ff; }
   #drop strong { color:var(--purple); }
   #drop .sub { color:#7a7490; font-size:13px; margin-top:8px; }
+  .privacy-note { margin:12px auto 0; max-width:680px; color:#5f5872;
+    font-size:13px; line-height:1.45; text-align:center; }
   input[type=file] { display:none; }
   #status { margin:16px 0; font-size:14px; min-height:20px; }
   #status.err { color:#c0264d; }
@@ -68,6 +70,7 @@
     <div class="sub">หรือแตะเพื่อเลือกไฟล์</div>
     <input type="file" id="file" accept="application/pdf">
   </label>
+  <p class="privacy-note">PDF processing happens locally in this browser. Your file is not uploaded to any server.</p>
   <div id="status"></div>
   <button id="dl" class="btn" disabled>⬇︎ ดาวน์โหลด PNG</button>
   <button id="ics" class="btn" disabled>📅 ดาวน์โหลด ปฏิทิน (.ics)</button>

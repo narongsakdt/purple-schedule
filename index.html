@@ -42,7 +42,7 @@
 <header>
   <h1>💜 Purple Schedule Maker</h1>
   <p>แปลงไฟล์ PDF ตารางบินลูกเรือ → รูปภาพ PNG ตารางสีม่วง</p>
-  <p>แจ้งปัญหา (Bug Report): MS Team 45481 Narongsak D.</p>
+  <p>แจ้งปัญหา (Bug Report): Attach .pdf to MS Team 45481 Narongsak D.</p>
 </header>
 <main>
   <label id="drop" for="file">
@@ -86,7 +86,11 @@ async function extractWords(arrayBuffer) {
     const str = it.str;
     if (!str || !str.trim()) continue;
     const x = it.transform[4];
-    const top = vp.height - it.transform[5];   // distance from top, in PDF points
+    // pdfplumber measures "top" at the glyph top; pdf.js gives the baseline in
+    // transform[5]. Subtract the glyph height so rows of different font sizes
+    // (e.g. the DUTY code row vs. the DUTY label) line up in the same band.
+    const gh = it.height || Math.abs(it.transform[3]) || 0;
+    const top = vp.height - it.transform[5] - gh;   // distance from top, in PDF points
     const charW = it.width / Math.max(str.length, 1);
     // split each run into whitespace-separated tokens, positioning by char width
     let idx = 0;
@@ -303,16 +307,18 @@ if (!document.getElementById("stagecss")) {
   s.textContent = STAGE_CSS; document.head.appendChild(s);
 }
 
-// ---- build .ics calendar (one VEVENT per flight leg) ----
+// ---- build .ics calendar: one VEVENT for every entry shown in the table ----
 const MONTH_NUM = {};
 ["January","February","March","April","May","June","July","August",
  "September","October","November","December"].forEach((m,i)=> MONTH_NUM[m]=i);
 
-function buildICS(meta, legs, ndays) {
+function buildICS(meta, days, legs, ndays) {
   const monIdx = MONTH_NUM[meta.month];
   const pad = n => String(n).padStart(2, "0");
-  const local = dt => `${dt.getFullYear()}${pad(dt.getMonth()+1)}${pad(dt.getDate())}`
-    + `T${pad(dt.getHours())}${pad(dt.getMinutes())}00`;
+  const dt = (dd) => `${meta.year}${pad(monIdx+1)}${pad(dd)}`;              // YYYYMMDD
+  const dtLocal = (dd, hm) => `${dt(dd)}T${hm.slice(0,2)}${hm.slice(2,4)}00`;
+  const esc = s => String(s).replace(/\\/g,"\\\\").replace(/;/g,"\\;")
+    .replace(/,/g,"\\,").replace(/\n/g,"\\n");
   const now = new Date();
   const stamp = `${now.getUTCFullYear()}${pad(now.getUTCMonth()+1)}${pad(now.getUTCDate())}`
     + `T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}Z`;
@@ -322,25 +328,40 @@ function buildICS(meta, legs, ndays) {
     `X-WR-CALNAME:${meta.month}${meta.year} ${meta.staff}`];
   let count = 0;
   for (let d = 1; d <= ndays; d++) {
-    (legs[d] || []).forEach((leg, i) => {
-      if (!(leg.dep && leg.arr && leg.dep_stn && leg.arr_stn)) return;
-      const dh = +leg.dep.slice(0,2), dm = +leg.dep.slice(2,4);
-      const ah = +leg.arr.slice(0,2), am = +leg.arr.slice(2,4);
-      const start = new Date(meta.year, monIdx, d, dh, dm);
-      let end = new Date(meta.year, monIdx, d, ah, am);
-      if (end <= start) end.setDate(end.getDate() + 1);   // overnight leg
-      const flt = leg.id ? leg.id : "";
-      const summary = `${flt ? flt + " " : ""}${leg.dep_stn}-${leg.arr_stn}`.trim();
-      lines.push("BEGIN:VEVENT",
-        `UID:${meta.staff}-${meta.month}${meta.year}-${d}-${i}@purpleschedule`,
-        `DTSTAMP:${stamp}`,
-        `DTSTART:${local(start)}`,
-        `DTEND:${local(end)}`,
-        `SUMMARY:${summary}`,
-        `LOCATION:${leg.dep_stn}`,
-        "END:VEVENT");
-      count++;
-    });
+    const toks = (days[d] || []).map(t => t[0]);
+    const title = toks.join(" ").trim();
+    // skip empty days and pure day-off markers (----, *****)
+    if (!title || !title.replace(/[-*\s]/g, "")) continue;
+
+    // gather the day's times from its legs (departures + arrivals)
+    const times = [];
+    for (const leg of (legs[d] || [])) {
+      if (leg.dep) times.push(leg.dep);
+      if (leg.arr) times.push(leg.arr);
+    }
+    const mins = times.map(t => (+t.slice(0,2)) * 60 + (+t.slice(2,4)));
+    let ev = ["BEGIN:VEVENT",
+      `UID:${meta.staff}-${meta.month}${meta.year}-${d}@purpleschedule`,
+      `DTSTAMP:${stamp}`];
+
+    const allDay = !mins.length || (Math.min(...mins) === 0 && Math.max(...mins) === 23*60+59);
+    if (allDay) {                                   // VAC / VOFF / HOL / off-with-no-time
+      const next = new Date(meta.year, monIdx, d + 1);
+      ev.push(`DTSTART;VALUE=DATE:${dt(d)}`,
+              `DTEND;VALUE=DATE:${next.getFullYear()}${pad(next.getMonth()+1)}${pad(next.getDate())}`);
+    } else {
+      const hm = m => `${pad(Math.floor(m/60))}${pad(m%60)}`;
+      let s = Math.min(...mins), e = Math.max(...mins);
+      const startDay = d;
+      let endDate = new Date(meta.year, monIdx, d);
+      if (e <= s) { e = s + 60; }                   // single time -> 1h block
+      if (e >= 24*60) { e -= 24*60; endDate.setDate(endDate.getDate()+1); }
+      ev.push(`DTSTART:${dtLocal(startDay, hm(s))}`,
+              `DTEND:${endDate.getFullYear()}${pad(endDate.getMonth()+1)}${pad(endDate.getDate())}T${hm(e)}00`);
+    }
+    ev.push(`SUMMARY:${esc(title)}`, "END:VEVENT");
+    lines.push(...ev);
+    count++;
   }
   lines.push("END:VCALENDAR");
   return { ics: lines.join("\r\n"), count };
@@ -385,7 +406,7 @@ async function handleFile(file) {
     $("#preview").appendChild(img);
     $("#dl").disabled = false;
 
-    const { ics, count } = buildICS(meta, legs, ndays);
+    const { ics, count } = buildICS(meta, days, legs, ndays);
     currentICS = ics;
     currentICSName = `${meta.staff}_${meta.month}_${meta.year}.ics`;
     $("#ics").disabled = count === 0;

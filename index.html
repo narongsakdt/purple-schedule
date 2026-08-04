@@ -176,6 +176,76 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "inline";
 </script>
 
 <script>
+// Match the desktop converter's column logic: use a word's centre, not its
+// left edge.  Long first-day codes can extend left of the first column (for
+// example CHMSBB330), but still belong to that column.
+(() => {
+  const originalParse = globalThis.PurpleCore.parse;
+
+  globalThis.PurpleCore.parse = (words, text) => {
+    const parsed = originalParse(words, text);
+    const headers = words
+      .filter(w => /^\d{1,2}(MON|TUE|WED|THU|FRI|SAT|SUN)$/.test(w.text))
+      .sort((a, b) => a.x0 - b.x0);
+    const centers = headers.map(w => [parseInt(w.text, 10), (w.x0 + w.x1) / 2]);
+    const colOf = word => {
+      const x = (word.x0 + word.x1) / 2;
+      for (let i = 0; i < centers.length; i++) {
+        const lo = i ? (centers[i - 1][1] + centers[i][1]) / 2 : centers[i][1] - 9;
+        const hi = i + 1 < centers.length ? (centers[i + 1][1] + centers[i][1]) / 2 : centers[i][1] + 9;
+        if (lo <= x && x < hi) return centers[i][0];
+      }
+      return null;
+    };
+    const dutyY = Math.min(...words.filter(w => w.text === "DUTY" && w.x0 < 120).map(w => w.top));
+    const fltYs = words.filter(w => w.text === "FLT" && w.x0 < 120).map(w => w.top).sort((a, b) => a - b);
+    const gridEnd = fltYs.length > 1 ? fltYs.at(-1) + fltYs[1] - fltYs[0] : fltYs.at(-1) + 54;
+    const headerY = headers[0].top;
+
+    parsed.duty = {};
+    for (const word of words) {
+      if (dutyY - 6 <= word.top && word.top < fltYs[0] - 6 && word.top > headerY + 4) {
+        const day = colOf(word);
+        if (day) (parsed.duty[day] ??= []).push([word.top, word.x0, word.text]);
+      }
+    }
+    for (const day in parsed.duty) {
+      parsed.duty[day] = parsed.duty[day].sort((a, b) => a[0] - b[0] || a[1] - b[1]).map(item => item[2]);
+    }
+
+    parsed.legs = {};
+    for (let block = 0; block < fltYs.length; block++) {
+      const top = fltYs[block];
+      const end = block + 1 < fltYs.length ? fltYs[block + 1] : gridEnd;
+      const cells = {};
+      for (const word of words) {
+        if (top - 6 <= word.top && word.top < end - 6) {
+          const day = colOf(word);
+          if (day) (cells[day] ??= []).push([word.top, word.text]);
+        }
+      }
+      for (const [day, items] of Object.entries(cells)) {
+        const leg = { id: null, dep_stn: null, dep: null, arr_stn: null, arr: null };
+        for (const [y, token] of items.sort((a, b) => a[0] - b[0])) {
+          if (/^\d{2}:\d{2}$/.test(token)) {
+            const side = y < top + 27 ? "dep" : "arr";
+            leg[side] ||= token.replace(":", "");
+          } else if (leg.id === null && y < top + 4) {
+            leg.id = token;
+          } else {
+            const side = y < top + 27 ? "dep_stn" : "arr_stn";
+            leg[side] ||= token;
+          }
+        }
+        if (leg.id || leg.dep || leg.arr) (parsed.legs[day] ??= []).push(leg);
+      }
+    }
+    return parsed;
+  };
+})();
+</script>
+
+<script>
 // ---- constants (ported from make_purple.py) ----
 const BASE_WIDTH = 3451, SCALE = 2;
 

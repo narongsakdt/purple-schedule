@@ -169,10 +169,10 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "inline";
 
 <script>
 /* PurpleCore — proprietary schedule-parsing logic (PDF word extraction,
-   grid parsing, day composition). Intentionally obfuscated; everything else
-   in this file is open. Exposes globalThis.PurpleCore =
+   grid parsing, day composition). This code is kept readable and does not
+   dynamically execute encoded content. Exposes globalThis.PurpleCore =
    { extractWords, parse, composeDays }. */
-(()=>{const c=["cmV0dXJuIGN9fX0pKCk7","cmluZyh0KSkpO2Zvcihjb25zdCBvIG9mIHIpcy5oYXMobyl8fGNbZV0ucHVzaChbbyx0XSl9","cz1uZXcgU2V0KGNbZV0ubWFwKHQ9PkFycmF5LmlzQXJyYXkodCk/U3RyaW5nKHRbMF0pOlN0","Lmxlbmd0aCljb250aW51ZTtBcnJheS5pc0FycmF5KGNbZV0pfHwoY1tlXT1bXSk7Y29uc3Qg","KS5maWx0ZXIodD0+InN0cmluZyI9PXR5cGVvZiB0JiYvXlwqKyQvLnRlc3QodCkpO2lmKCFy","ZXIoYSl8fDApO2UrKyl7Y29uc3Qgcj0oQXJyYXkuaXNBcnJheShvJiZvW2VdKT9vW2VdOltd","LGVdKTtkPSIifWlbZl09cH1yZXR1cm4gaX0obyxuLGEpO2ZvcihsZXQgZT0xO2U8PShOdW1i","P2Ake2R9QktLKCR7dH0pYDpgJHtkfUJLS2AsZV0pfWVsc2UgcC5wdXNoKFtgJHtkfSR7b31g","PT1vLmFycl9zdG4mJm8uYXJyKXt0PW8uYXJyO2JyZWFrfWlmKHQpYnJlYWt9cC5wdXNoKFt0","TWF0aC5tYXgoMCxmLTMpO2UtLSl7Zm9yKGNvbnN0IG8gb2YgbltlXXx8W10paWYoIkJLSyI9","bGw7aWYoaCYmIkJLSyI9PT1oLmFycl9zdG4pdD1oLmFycjtlbHNlIGZvcihsZXQgZT1mO2U+","ZSBpZigiQktLIj09PW8pe2lmKHUmJm51bGw9PT1oKXtkPSIiO2NvbnRpbnVlfWxldCB0PW51","LG8pO3AucHVzaChbYCR7ZH0ke299KCR7ZS5kZXB9LSR7ZS5hcnJ9KWAsdF0pLHU9ITB9ZWxz","dXNoKFtgJHtkfSR7YyhvKX1gLHRdKSxoPWV9ZWxzZSBpZihsKGYsbykpe2NvbnN0IGU9bChm","ZGVwX3N0biYmZS5kZXA/cC5wdXNoKFtgJHtkfSR7YyhvKX0oJHtlLmRlcH0pYCx0XSk6cC5w","ZXtpZigvXlxkezMsNH0kLy50ZXN0KG8pKXtjb25zdCBlPWwoZixvKTtlJiYiQktLIj09PWUu","dWxsLHU9ITEsZD0iIjtmb3IoY29uc3QgbyBvZiBhKWlmKHIuaGFzKG8pKWQ9bysiICI7ZWxz","dD0+IXMudGVzdCh0KSYmIVsuLi50XS5ldmVyeSh0PT4iKiI9PT10KSkscD1bXTtsZXQgaD1u","LGk9e307Zm9yKGxldCBmPTE7Zjw9YTtmKyspe2NvbnN0IGE9KG9bZl18fFtdKS5maWx0ZXIo","YXJ0KDQsIjAiKSxsPSh0LGUpPT4oblt0XXx8W10pLmZpbmQodD0+dC5pZD09PWUpfHxudWxs","LGEpe2NvbnN0IGM9ZnVuY3Rpb24obyxuLGEpe2NvbnN0IGM9dD0+U3RyaW5nKHQpLnBhZFN0","ZWdzOncsZG93czpwLG5kYXlzOmkubGVuZ3RofX0sY29tcG9zZURheXM6ZnVuY3Rpb24obyxu","cHx8ci5hcnIpJiYod1t0XT13W3RdfHxbXSkucHVzaChyKX19KSx7bWV0YTpyLGR1dHk6QSxs","bnN0IGU9dDxhPyJkZXBfc3RuIjoiYXJyX3N0biI7cltlXT1yW2VdfHxufShyLmlkfHxyLmRl","bGFjZSgiOiIsIiIpfWVsc2UgaWYobnVsbD09PXIuaWQmJnQ8ZSs0KXIuaWQ9bjtlbHNle2Nv","aWYocy50ZXN0KG4pKXtjb25zdCBlPXQ8YT8iZGVwIjoiYXJyIjtyW2VdPXJbZV18fG4ucmVw","bnVsbCxhcnJfc3RuOm51bGwsYXJyOm51bGx9LGE9ZSsyNztmb3IoY29uc3RbdCxuXW9mIG8p","dF0uc29ydCgodCxlKT0+dFswXS1lWzBdKSxyPXtpZDpudWxsLGRlcF9zdG46bnVsbCxkZXA6","fFtdKS5wdXNoKFtvLnRvcCxvLnRleHRdKX1mb3IoY29uc3QgdCBpbiBuKXtjb25zdCBvPW5b","LnRvcCYmby50b3A8ci02JiZvLngwPjEwNSl7Y29uc3QgdD11KG8pO3QmJihuW3RdPW5bdF18","PW8rMTxnLmxlbmd0aD9nW28rMV06eCxuPXt9O2Zvcihjb25zdCBvIG9mIHQpaWYoZS02PD1v","cCh0PT50WzJdKTtjb25zdCB3PXt9O3JldHVybiBnLmZvckVhY2goKGUsbyk9Pntjb25zdCBy","IHQgaW4gQSlBW3RdPUFbdF0uc29ydCgodCxlKT0+dFswXS1lWzBdfHx0WzFdLWVbMV0pLm1h","dCYmKEFbdF09QVt0XXx8W10pLnB1c2goW2UudG9wLGUueDAsZS50ZXh0XSl9Zm9yKGNvbnN0","LnRvcCYmZS50b3A8Z1swXS02JiZlLngwPjEwNSYmZS50b3A+ZCs0KXtjb25zdCB0PXUoZSk7","Z1swXSk6Z1tnLmxlbmd0aC0xXSs1NCxBPXt9O2Zvcihjb25zdCBlIG9mIHQpaWYobS02PD1l","bmQgRkxUIHJvd3MuIik7Y29uc3QgeD1nLmxlbmd0aD4xP2dbZy5sZW5ndGgtMV0rKGdbMV0t","KHQsZSk9PnQtZSk7aWYoIWcubGVuZ3RoKXRocm93IG5ldyBFcnJvcigiQ291bGQgbm90IGZp","aWx0ZXIodD0+IkZMVCI9PT10LnRleHQmJnQueDA8MTIwKS5tYXAodD0+dC50b3ApLnNvcnQo","dGVyKHQ9PiJEVVRZIj09PXQudGV4dCYmdC54MDwxMjApLm1hcCh0PT50LnRvcCkpLGc9dC5m","cilyZXR1cm4gdDtyZXR1cm4gbnVsbH0sZD1pWzBdLnRvcCxtPU1hdGgubWluKC4uLnQuZmls","Y29uc3QgZT0odC54MCt0LngxKS8yO2Zvcihjb25zdFt0LG8scl1vZiBoKWlmKG88PWUmJmU8","Z3RoPyhmW28rMV1bMV0rZSkvMjplKzk7aC5wdXNoKFt0LHIsc10pfSk7Y29uc3QgdT10PT57","KChbdCxlXSxvKT0+e2NvbnN0IHI9bz8oZltvLTFdWzFdK2UpLzI6ZS05LHM9bysxPGYubGVu","ZW5ndGgpKSxmLnB1c2goW2UsKHQueDArdC54MSkvMl0pfWNvbnN0IGg9W107Zi5mb3JFYWNo","dC5tYXRjaCgvXlxkKy8pWzBdLDEwKTtwW2VdPWwodC50ZXh0LnNsaWNlKFN0cmluZyhlKS5s","bnN0IGY9W10scD17fTtmb3IoY29uc3QgdCBvZiBpKXtjb25zdCBlPXBhcnNlSW50KHQudGV4","Q291bGQgbm90IGZpbmQgdGhlIGRheSBoZWFkZXIgcm93ICgxTU9O4oCmMzHigKYpLiIpO2Nv","LnNvcnQoKHQsZSk9PnQueDAtZS54MCk7aWYoIWkubGVuZ3RoKXRocm93IG5ldyBFcnJvcigi","L15cZHsxLDJ9KE1PTnxUVUV8V0VEfFRIVXxGUkl8U0FUfFNVTikkLy50ZXN0KHQudGV4dCkp","b1VwcGVyQ2FzZSgpK3Quc2xpY2UoMSkudG9Mb3dlckNhc2UoKTp0LGk9dC5maWx0ZXIodD0+","LnllYXI9MmUzK3BhcnNlSW50KGFbMl0sMTApO2NvbnN0IGw9dD0+dC5sZW5ndGg/dFswXS50","VXBwZXJDYXNlKCkrYVsxXS5zbGljZSgxKS50b0xvd2VyQ2FzZSgpO3IubW9udGg9b1tjXSxy","YS16XXszfSkoXGR7Mn0pLyksYXx8bigiRUZGRUNUSVZFIik7Y29uc3QgYz1hWzFdWzBdLnRv","aW4oIiwiKSxyLnJhbms9YVsyXSxhPWUubWF0Y2goL0VGRkVDVElWRTpccypcZHsyfShbQS1a","fG4oIkEvQyBRVUFMIC8gUkFOSyIpLHIuYWM9YVsxXS50cmltKCkuc3BsaXQoL1xzKy8pLmpv","YT1lLm1hdGNoKC9BXC9DIFFVQUw6XHMqKFtcZCBdKz8pXHMqUkFOSzpccyooXFMrKS8pLGF8","Y2F0ZWdvcnk9X19uY1sxXSxyLm5hbWU9X19uYy5zbGljZSgyKS5qb2luKCIgIik7bGV0IGE7","bmd0aDwzJiZuKCJQRVJTLk5PIC8g4LiK4Li34LmI4LitIiksci5zdGFmZj1fX25jWzBdLHIu","TWF0aC5yb3VuZCh2LnRvcC82KXx8dy54MC12LngwKS5tYXAodz0+dy50ZXh0KTtfX25jLmxl","cC0yJiZ3LnRvcDxfX1EudG9wLTIpLnNvcnQoKHcsdik9Pk1hdGgucm91bmQody50b3AvNikt","KTtjb25zdCBfX25jPXQuZmlsdGVyKHc9PncueDA+PV9fUC54MSsyJiZ3LnRvcD49X19QLnRv","LF9fUT1fX1coIkEvQyIpOyhfX1AmJl9fUSl8fG4oIlBFUlMuTk8gLyDguIrguLfguYjguK0i","dD09PXMpLnNvcnQoKHcsdik9PncudG9wLXYudG9wKVswXSxfX1A9X19XKCJQRVJTLk5POiIp","iOC4suC4meC5hOC4lOC5iTogYCtvKX07Y29uc3QgX19XPXM9PnQuZmlsdGVyKHc9PncudGV4","4Lih4Li54LilICR7dH0g4oCUIOC4guC5ieC4reC4hOC4p+C4suC4oeC4l+C4teC5iOC4reC5","bi9nLCIg4o+OICIpO3Rocm93IG5ldyBFcnJvcihg4LmE4Lih4LmI4Lie4Lia4LiC4LmJ4Lit","LGUpe2NvbnN0IHI9e30sbj10PT57Y29uc3Qgbz1lLnNsaWNlKDAsNjAwKS5yZXBsYWNlKC9c","PnQudGV4dCkuam9pbigiICIpKS5qb2luKCJcbiIpKyJcbiJ9fSxwYXJzZTpmdW5jdGlvbih0","cmRzOm4sdGV4dDpjLm1hcCh0PT50LndzLnNvcnQoKHQsZSk9PnQueDAtZS54MCkubWFwKHQ9","bD17dG9wOnQudG9wLHdzOlt0XX0sYy5wdXNoKGwpKTpsLndzLnB1c2godCk7cmV0dXJue3dv","IGw9bnVsbDtmb3IoY29uc3QgdCBvZiBhKSFsfHxNYXRoLmFicyh0LnRvcC1sLnRvcCk+Mz8o","IGE9Wy4uLm5dLnNvcnQoKHQsZSk9PnQudG9wLWUudG9wfHx0LngwLWUueDApLGM9W107bGV0","dGV4dDp0LHgwOmUseDE6ZSt0Lmxlbmd0aCpjLHRvcDphfSl9bCs9dC5sZW5ndGh9fWNvbnN0","IGUuc3BsaXQoLyhccyspLykpe2lmKHQudHJpbSgpKXtjb25zdCBlPW8rbCpjO24ucHVzaCh7","LGM9dC53aWR0aC9NYXRoLm1heChlLmxlbmd0aCwxKTtsZXQgbD0wO2Zvcihjb25zdCB0IG9m","YXRoLmFicyh0LnRyYW5zZm9ybVszXSl8fDAsYT1yLmhlaWdodC10LnRyYW5zZm9ybVs1XS1z","ZS50cmltKCkpY29udGludWU7Y29uc3Qgbz10LnRyYW5zZm9ybVs0XSxzPXQuaGVpZ2h0fHxN","KCksbj1bXTtmb3IoY29uc3QgdCBvZiBzLml0ZW1zKXtjb25zdCBlPXQuc3RyO2lmKCFlfHwh","MSkscj1vLmdldFZpZXdwb3J0KHtzY2FsZToxfSkscz1hd2FpdCBvLmdldFRleHRDb250ZW50","anNMaWIuZ2V0RG9jdW1lbnQoe2RhdGE6dH0pLnByb21pc2Usbz1hd2FpdCBlLmdldFBhZ2Uo","Q29yZT17ZXh0cmFjdFdvcmRzOmFzeW5jIGZ1bmN0aW9uKHQpe2NvbnN0IGU9YXdhaXQgcGRm","IlMiLCJWIiwiQCIsIkdUIl0pLHM9L15cZHsyfTpcZHsyfSQvO2dsb2JhbFRoaXMuUHVycGxl","PT5vW3Quc2xpY2UoMCwzKV09dCk7Y29uc3Qgcj1uZXcgU2V0KFsiTCIsIlAiLCJVIiwiTiIs","IlNlcHRlbWJlciIsIk9jdG9iZXIiLCJOb3ZlbWJlciIsIkRlY2VtYmVyIl0uZm9yRWFjaCh0","ZWJydWFyeSIsIk1hcmNoIiwiQXByaWwiLCJNYXkiLCJKdW5lIiwiSnVseSIsIkF1Z3VzdCIs","KCgpPT57Y29uc3QgdD0iIzAwMDA4MCIsZT0iIzRCMDA4MiIsbz17fTtbIkphbnVhcnkiLCJG"];(0,eval)(atob(c.reverse().join("")));})();
+(()=>{const t="#000080",e="#4B0082",o={};["January","February","March","April","May","June","July","August","September","October","November","December"].forEach(t=>o[t.slice(0,3)]=t);const r=new Set(["L","P","U","N","S","V","@","GT"]),s=/^\d{2}:\d{2}$/;globalThis.PurpleCore={extractWords:async function(t){const e=await pdfjsLib.getDocument({data:t}).promise,o=await e.getPage(1),r=o.getViewport({scale:1}),s=await o.getTextContent(),n=[];for(const t of s.items){const e=t.str;if(!e||!e.trim())continue;const o=t.transform[4],s=t.height||Math.abs(t.transform[3])||0,a=r.height-t.transform[5]-s,c=t.width/Math.max(e.length,1);let l=0;for(const t of e.split(/(\s+)/)){if(t.trim()){const e=o+l*c;n.push({text:t,x0:e,x1:e+t.length*c,top:a})}l+=t.length}}const a=[...n].sort((t,e)=>t.top-e.top||t.x0-e.x0),c=[];let l=null;for(const t of a)!l||Math.abs(t.top-l.top)>3?(l={top:t.top,ws:[t]},c.push(l)):l.ws.push(t);return{words:n,text:c.map(t=>t.ws.sort((t,e)=>t.x0-e.x0).map(t=>t.text).join(" ")).join("\n")+"\n"}},parse:function(t,e){const r={},n=t=>{const o=e.slice(0,600).replace(/\n/g," ⏎ ");throw new Error(`ไม่พบข้อมูล ${t} — ข้อความที่อ่านได้: `+o)};const __W=s=>t.filter(w=>w.text===s).sort((w,v)=>w.top-v.top)[0],__P=__W("PERS.NO:"),__Q=__W("A/C");(__P&&__Q)||n("PERS.NO / ชื่อ");const __nc=t.filter(w=>w.x0>=__P.x1+2&&w.top>=__P.top-2&&w.top<__Q.top-2).sort((w,v)=>Math.round(w.top/6)-Math.round(v.top/6)||w.x0-v.x0).map(w=>w.text);__nc.length<3&&n("PERS.NO / ชื่อ"),r.staff=__nc[0],r.category=__nc[1],r.name=__nc.slice(2).join(" ");let a;a=e.match(/A\/C QUAL:\s*([\d ]+?)\s*RANK:\s*(\S+)/),a||n("A/C QUAL / RANK"),r.ac=a[1].trim().split(/\s+/).join(","),r.rank=a[2],a=e.match(/EFFECTIVE:\s*\d{2}([A-Za-z]{3})(\d{2})/),a||n("EFFECTIVE");const c=a[1][0].toUpperCase()+a[1].slice(1).toLowerCase();r.month=o[c],r.year=2e3+parseInt(a[2],10);const l=t=>t.length?t[0].toUpperCase()+t.slice(1).toLowerCase():t,i=t.filter(t=>/^\d{1,2}(MON|TUE|WED|THU|FRI|SAT|SUN)$/.test(t.text)).sort((t,e)=>t.x0-e.x0);if(!i.length)throw new Error("Could not find the day header row (1MON…31…).");const f=[],p={};for(const t of i){const e=parseInt(t.text.match(/^\d+/)[0],10);p[e]=l(t.text.slice(String(e).length)),f.push([e,(t.x0+t.x1)/2])}const h=[];f.forEach(([t,e],o)=>{const r=o?(f[o-1][1]+e)/2:e-9,s=o+1<f.length?(f[o+1][1]+e)/2:e+9;h.push([t,r,s])});const u=t=>{const e=(t.x0+t.x1)/2;for(const[t,o,r]of h)if(o<=e&&e<r)return t;return null},d=i[0].top,m=Math.min(...t.filter(t=>"DUTY"===t.text&&t.x0<120).map(t=>t.top)),g=t.filter(t=>"FLT"===t.text&&t.x0<120).map(t=>t.top).sort((t,e)=>t-e);if(!g.length)throw new Error("Could not find FLT rows.");const x=g.length>1?g[g.length-1]+(g[1]-g[0]):g[g.length-1]+54,A={};for(const e of t)if(m-6<=e.top&&e.top<g[0]-6&&e.x0>105&&e.top>d+4){const t=u(e);t&&(A[t]=A[t]||[]).push([e.top,e.x0,e.text])}for(const t in A)A[t]=A[t].sort((t,e)=>t[0]-e[0]||t[1]-e[1]).map(t=>t[2]);const w={};return g.forEach((e,o)=>{const r=o+1<g.length?g[o+1]:x,n={};for(const o of t)if(e-6<=o.top&&o.top<r-6&&o.x0>105){const t=u(o);t&&(n[t]=n[t]||[]).push([o.top,o.text])}for(const t in n){const o=n[t].sort((t,e)=>t[0]-e[0]),r={id:null,dep_stn:null,dep:null,arr_stn:null,arr:null},a=e+27;for(const[t,n]of o)if(s.test(n)){const e=t<a?"dep":"arr";r[e]=r[e]||n.replace(":","")}else if(null===r.id&&t<e+4)r.id=n;else{const e=t<a?"dep_stn":"arr_stn";r[e]=r[e]||n}(r.id||r.dep||r.arr)&&(w[t]=w[t]||[]).push(r)}}),{meta:r,duty:A,legs:w,dows:p,ndays:i.length}},composeDays:function(o,n,a){const c=function(o,n,a){const c=t=>String(t).padStart(4,"0"),l=(t,e)=>(n[t]||[]).find(t=>t.id===e)||null,i={};for(let f=1;f<=a;f++){const a=(o[f]||[]).filter(t=>!s.test(t)&&![...t].every(t=>"*"===t)),p=[];let h=null,u=!1,d="";for(const o of a)if(r.has(o))d=o+" ";else{if(/^\d{3,4}$/.test(o)){const e=l(f,o);e&&"BKK"===e.dep_stn&&e.dep?p.push([`${d}${c(o)}(${e.dep})`,t]):p.push([`${d}${c(o)}`,t]),h=e}else if(l(f,o)){const e=l(f,o);p.push([`${d}${o}(${e.dep}-${e.arr})`,t]),u=!0}else if("BKK"===o){if(u&&null===h){d="";continue}let t=null;if(h&&"BKK"===h.arr_stn)t=h.arr;else for(let e=f;e>Math.max(0,f-3);e--){for(const o of n[e]||[])if("BKK"===o.arr_stn&&o.arr){t=o.arr;break}if(t)break}p.push([t?`${d}BKK(${t})`:`${d}BKK`,e])}else p.push([`${d}${o}`,e]);d=""}i[f]=p}return i}(o,n,a);for(let e=1;e<=(Number(a)||0);e++){const r=(Array.isArray(o&&o[e])?o[e]:[]).filter(t=>"string"==typeof t&&/^\*+$/.test(t));if(!r.length)continue;Array.isArray(c[e])||(c[e]=[]);const s=new Set(c[e].map(t=>Array.isArray(t)?String(t[0]):String(t)));for(const o of r)s.has(o)||c[e].push([o,t])}return c}}})();
 </script>
 
 <script>
@@ -183,7 +183,24 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "inline";
   const originalParse = globalThis.PurpleCore.parse;
 
   globalThis.PurpleCore.parse = (words, text) => {
-    const parsed = originalParse(words, text);
+    // PDF text layers are allowed to split labels around whitespace and
+    // punctuation (for example, `A/C QUAL :` instead of `A/C QUAL:`), even
+    // when the rendered PDF looks identical. Normalize those known header
+    // labels before the embedded parser applies its strict metadata regexes.
+    const normalizedText = text
+      .replace(/PERS\.\s*NO\s*:/g, "PERS.NO:")
+      .replace(/A\/C\s+QUAL\s*:/g, "A/C QUAL:")
+      .replace(/RANK\s*:/g, "RANK:")
+      .replace(/EFFECTIVE\s*:/g, "EFFECTIVE:");
+    // Aircraft qualifications can include suffixes such as `32W`, not only
+    // digits. Let the embedded parser locate the metadata using a digit-only
+    // shadow value, then restore the original qualification text below.
+    const qualMatch = normalizedText.match(/A\/C QUAL:\s*([A-Za-z0-9 ]+?)\s*RANK:/);
+    const parserText = qualMatch
+      ? normalizedText.replace(qualMatch[1], qualMatch[1].replace(/[A-Za-z]/g, ""))
+      : normalizedText;
+    const parsed = originalParse(words, parserText);
+    if (qualMatch) parsed.meta.ac = qualMatch[1].trim().split(/\s+/).join(",");
     const headers = words
       .filter(w => /^\d{1,2}(MON|TUE|WED|THU|FRI|SAT|SUN)$/.test(w.text))
       .sort((a, b) => a.x0 - b.x0);
@@ -318,20 +335,21 @@ const MONTH_NUM = {};
     LHR:"Europe/London",FRA:"Europe/Berlin",MUC:"Europe/Berlin",ZRH:"Europe/Zurich",
     CPH:"Europe/Copenhagen",MXP:"Europe/Rome",BRU:"Europe/Brussels",VIE:"Europe/Vienna",
     MEL:"Australia/Melbourne",SYD:"Australia/Sydney",
-    ISB:"Asia/Karachi",KHI:"Asia/Karachi",SIN:"Asia/Singapore",
+    ISB:"Asia/Karachi",KHI:"Asia/Karachi",LHE:"Asia/Karachi",SIN:"Asia/Singapore",
     CGK:"Asia/Jakarta",DPS:"Asia/Makassar",
-    HKG:"Asia/Hong_Kong",TPE:"Asia/Taipei",PVG:"Asia/Shanghai",PEK:"Asia/Shanghai",
+    HKG:"Asia/Hong_Kong",KHH:"Asia/Taipei",TPE:"Asia/Taipei",PVG:"Asia/Shanghai",PEK:"Asia/Shanghai",
     CAN:"Asia/Shanghai",KMG:"Asia/Shanghai",CTU:"Asia/Shanghai",
     MNL:"Asia/Manila",HAN:"Asia/Ho_Chi_Minh",SGN:"Asia/Ho_Chi_Minh",
     PNH:"Asia/Phnom_Penh",REP:"Asia/Phnom_Penh",VTE:"Asia/Vientiane",
     RGN:"Asia/Yangon",
-    DEL:"Asia/Kolkata",BOM:"Asia/Kolkata",MAA:"Asia/Kolkata",BLR:"Asia/Kolkata",
-    HYD:"Asia/Kolkata",CCU:"Asia/Kolkata",GAY:"Asia/Kolkata",
-    DAC:"Asia/Dhaka",KTM:"Asia/Kathmandu",CMB:"Asia/Colombo"};
+    DEL:"Asia/Kolkata",BOM:"Asia/Kolkata",MAA:"Asia/Kolkata",AMD:"Asia/Kolkata",
+    BLR:"Asia/Kolkata",COK:"Asia/Kolkata",HYD:"Asia/Kolkata",CCU:"Asia/Kolkata",GAY:"Asia/Kolkata",
+    DAC:"Asia/Dhaka",KTM:"Asia/Kathmandu",CMB:"Asia/Colombo",
+    AMS:"Europe/Amsterdam",IST:"Europe/Istanbul",ARN:"Europe/Stockholm"};
   const UTC_OFFSETS = {"Asia/Bangkok":7,"Asia/Kuala_Lumpur":8,"Australia/Perth":8,
     "Asia/Shanghai":8,"Asia/Tokyo":9,"Asia/Seoul":9,"Asia/Karachi":5,
     "Europe/Paris":2,"Europe/Oslo":2,"Europe/Copenhagen":2,"Europe/Rome":2,
-    "Europe/Brussels":2,"Europe/Vienna":2,
+    "Europe/Brussels":2,"Europe/Vienna":2,"Europe/Amsterdam":2,"Europe/Istanbul":3,"Europe/Stockholm":2,
     "Europe/Berlin":2,"Europe/Zurich":2,"Europe/London":1,
     "Australia/Sydney":10,"Australia/Melbourne":10,
     "Asia/Singapore":8,"Asia/Jakarta":7,"Asia/Makassar":8,
@@ -373,6 +391,9 @@ const MONTH_NUM = {};
     "Europe/Rome":cetVtz("Europe/Rome"),
     "Europe/Brussels":cetVtz("Europe/Brussels"),
     "Europe/Vienna":cetVtz("Europe/Vienna"),
+    "Europe/Amsterdam":cetVtz("Europe/Amsterdam"),
+    "Europe/Istanbul":fixedVtz("Europe/Istanbul",3,"+03"),
+    "Europe/Stockholm":cetVtz("Europe/Stockholm"),
     "Asia/Hong_Kong":fixedVtz("Asia/Hong_Kong",8,"HKT"),
     "Asia/Taipei":fixedVtz("Asia/Taipei",8,"CST"),
     "Asia/Manila":fixedVtz("Asia/Manila",8,"PHT"),
@@ -468,7 +489,7 @@ const MONTH_NUM = {};
   }
 
   const dutyEmoji = code =>
-    /^(VAC|VOFF|HOL)/.test(code) ? `\u{1F334} LEAVE (${code})` :
+    /^(VAC|VOFF|HOL)/.test(code) ? `\u{1F334} ${code}` :
     code.startsWith("CHM")       ? `☎️ ${code}` : `\u{1F3E2} ${code}`;
 
   // resolve flight datetimes (arrival day is explicit after the rejoin)

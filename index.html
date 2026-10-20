@@ -674,7 +674,6 @@ async function handleFile(file) {
     $("#preview").appendChild(img);
     $("#dl").disabled = false;
     $("#savePhotos").disabled = false;
-    downloadCurrentImage();
 
     const { ics, count } = buildICS(meta, days, legs, ndays, duty);
     currentICS = ics;

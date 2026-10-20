@@ -139,7 +139,7 @@
   <h1>💜 Purple Schedule Maker</h1>
   <p>แปลงไฟล์ PDF ตารางบินลูกเรือ → รูปภาพ PNG ตารางสีม่วง</p>
   <p>แจ้งปัญหา (Bug Report): Attach .pdf to MS Team 45481</p>
-  <p>Updated: 20 Oct 2026, 07:16 (Bangkok time)</p>
+  <p>Updated: 20 Oct 2026, 07:28 (Bangkok time)</p>
 </header>
 <main>
   <label id="drop" for="file">
@@ -672,6 +672,7 @@ async function handleFile(file) {
     $("#preview").innerHTML = "";
     $("#preview").appendChild(img);
     $("#dl").disabled = false;
+    downloadCurrentImage();
 
     const { ics, count } = buildICS(meta, days, legs, ndays, duty);
     currentICS = ics;
@@ -688,6 +689,13 @@ async function handleFile(file) {
 
 // ---- wiring ----
 const drop = $("#drop"), fileInput = $("#file");
+function downloadCurrentImage() {
+  if (!currentDataURL) return;
+  const a = document.createElement("a");
+  a.href = currentDataURL;
+  a.download = currentName;
+  a.click();
+}
 fileInput.addEventListener("change", e => handleFile(e.target.files[0]));
 ["dragenter","dragover"].forEach(ev => drop.addEventListener(ev, e => {
   e.preventDefault(); drop.classList.add("hover"); }));
@@ -697,11 +705,7 @@ drop.addEventListener("drop", e => {
   const f = e.dataTransfer.files[0];
   if (f) { fileInput.value = ""; handleFile(f); }
 });
-$("#dl").addEventListener("click", () => {
-  if (!currentDataURL) return;
-  const a = document.createElement("a");
-  a.href = currentDataURL; a.download = currentName; a.click();
-});
+$("#dl").addEventListener("click", downloadCurrentImage);
 
 const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent)
   || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);

@@ -139,6 +139,7 @@
   <h1>💜 Purple Schedule Maker</h1>
   <p>แปลงไฟล์ PDF ตารางบินลูกเรือ → รูปภาพ PNG ตารางสีม่วง</p>
   <p>แจ้งปัญหา (Bug Report): Attach .pdf to MS Team 45481</p>
+  <p>Updated: 20 Oct 2026</p>
 </header>
 <main>
   <label id="drop" for="file">
@@ -258,27 +259,19 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "inline";
       }
     }
 
-    // Standby codes can run overnight and are split across day columns just
-    // like flights: the code/departure is on day one, while the BKK arrival
-    // and end time sit in the next day's otherwise empty cell. Join that end
-    // time to the standby so the schedule and calendar show the full period.
-    const joinedArrivals = new Set();
-    for (let day = 1; day <= parsed.ndays; day++) {
-      for (const leg of parsed.legs[day] || []) {
-        if (!/^(CHM|SB)/i.test(String(leg.id || "")) || !leg.dep || leg.arr) continue;
-        for (let nextDay = day + 1; nextDay <= Math.min(parsed.ndays, day + 2); nextDay++) {
-          const arrival = (parsed.legs[nextDay] || []).find(candidate =>
-            !joinedArrivals.has(candidate) && !candidate.id && !candidate.dep
-            && candidate.arr && (!candidate.arr_stn || candidate.arr_stn === "BKK"));
-          if (!arrival) continue;
-          leg.arr = arrival.arr;
-          leg.arr_stn = arrival.arr_stn || leg.arr_stn;
-          joinedArrivals.add(arrival);
-          break;
-        }
+    return parsed;
+  };
+
+  const originalComposeDays = globalThis.PurpleCore.composeDays;
+  globalThis.PurpleCore.composeDays = (duty, legs, ndays) => {
+    const days = originalComposeDays(duty, legs, ndays);
+    for (const entries of Object.values(days)) {
+      for (const entry of entries) {
+        if (Array.isArray(entry) && typeof entry[0] === "string")
+          entry[0] = entry[0].replace(/\b((?:CHM|SB)\w*)\((\d{4})-null\)/, "☎️ $1($2)");
       }
     }
-    return parsed;
+    return days;
   };
 })();
 </script>
@@ -502,9 +495,17 @@ const MONTH_NUM = {};
                               depDay: s.day, dest, arr, arrDay,
                               firstOfDay: !flights.some(f => f.depDay === s.day) });
       s.used = true;
-    } else if (id && l.dep && l.arr && !INDICATORS.has(id)) {
+    } else if (id && l.dep && !INDICATORS.has(id)
+               && (l.arr || /^(CHM|SB)/i.test(id))) {
       // indicator letters (L/P/U/N/S/V/@/GT) are markers, never event codes
-      groundDuties.push({ code: id, day: s.day, dep: l.dep, arr: l.arr });
+      let arr = l.arr, arrDay = s.day;
+      if (!arr && /^(CHM|SB)/i.test(id)) {
+        const cont = slots.find(x => !x.used && !x.leg.id && !x.leg.dep && x.leg.arr
+          && (!x.leg.arr_stn || x.leg.arr_stn === "BKK")
+          && x.day > s.day && x.day <= s.day + 2);
+        if (cont) { arr = cont.leg.arr; arrDay = cont.day; cont.used = true; }
+      }
+      if (arr) groundDuties.push({ code: id, day: s.day, dep: l.dep, arr, arrDay });
       s.used = true;
     }
   }
@@ -553,7 +554,7 @@ const MONTH_NUM = {};
   for (const g of groundDuties) {
     const [sh, sm] = hm(g.dep), [eh, em] = hm(g.arr);
     const start = new Date(year, monIdx, g.day, sh, sm);
-    let end = new Date(year, monIdx, g.day, eh, em);
+    let end = new Date(year, monIdx, g.arrDay, eh, em);
     if (end <= start) end = new Date(year, monIdx, g.day + 1, eh, em);
     addEvent(dutyEmoji(g.code), start, "Asia/Bangkok", end, "Asia/Bangkok", "BKK");
   }

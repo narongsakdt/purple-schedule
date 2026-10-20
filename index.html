@@ -139,7 +139,7 @@
   <h1>💜 Purple Schedule Maker</h1>
   <p>แปลงไฟล์ PDF ตารางบินลูกเรือ → รูปภาพ PNG ตารางสีม่วง</p>
   <p>แจ้งปัญหา (Bug Report): Attach .pdf to MS Team 45481</p>
-  <p>Updated: 20 Oct 2026, 07:15 (Bangkok time)</p>
+  <p>Updated: 20 Oct 2026, 07:16 (Bangkok time)</p>
 </header>
 <main>
   <label id="drop" for="file">
@@ -579,7 +579,9 @@ const MONTH_NUM = {};
   }
 
   events.sort((a, b) => a.sort - b.sort);
-  const calName = `${meta.name} - ${meta.month.slice(0,3)} ${year} Roster`;
+  const ownerInitials = (meta.name || "").trim().split(/\s+/)
+    .filter(Boolean).map(part => part[0].toUpperCase()).join("");
+  const calName = `${meta.month.slice(0,3)} ${String(year).slice(-2)} - ${ownerInitials}`;
   const vtimezones = [...tzsUsed].filter(t => VTZ[t]).sort()
     .map(t => VTZ[t]).join("\n");
   const parts = ["BEGIN:VCALENDAR","VERSION:2.0",

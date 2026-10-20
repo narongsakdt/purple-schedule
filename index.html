@@ -257,6 +257,27 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "inline";
         if (leg.id || leg.dep || leg.arr) (parsed.legs[day] ??= []).push(leg);
       }
     }
+
+    // Standby codes can run overnight and are split across day columns just
+    // like flights: the code/departure is on day one, while the BKK arrival
+    // and end time sit in the next day's otherwise empty cell. Join that end
+    // time to the standby so the schedule and calendar show the full period.
+    const joinedArrivals = new Set();
+    for (let day = 1; day <= parsed.ndays; day++) {
+      for (const leg of parsed.legs[day] || []) {
+        if (!/^(CHM|SB)/i.test(String(leg.id || "")) || !leg.dep || leg.arr) continue;
+        for (let nextDay = day + 1; nextDay <= Math.min(parsed.ndays, day + 2); nextDay++) {
+          const arrival = (parsed.legs[nextDay] || []).find(candidate =>
+            !joinedArrivals.has(candidate) && !candidate.id && !candidate.dep
+            && candidate.arr && (!candidate.arr_stn || candidate.arr_stn === "BKK"));
+          if (!arrival) continue;
+          leg.arr = arrival.arr;
+          leg.arr_stn = arrival.arr_stn || leg.arr_stn;
+          joinedArrivals.add(arrival);
+          break;
+        }
+      }
+    }
     return parsed;
   };
 })();
@@ -490,7 +511,7 @@ const MONTH_NUM = {};
 
   const dutyEmoji = code =>
     /^(VAC|VOFF|HOL)/.test(code) ? `\u{1F334} ${code}` :
-    code.startsWith("CHM")       ? `☎️ ${code}` : `\u{1F3E2} ${code}`;
+    /^(CHM|SB)/.test(code)       ? `☎️ ${code}` : `\u{1F3E2} ${code}`;
 
   // resolve flight datetimes (arrival day is explicit after the rejoin)
   for (const f of flights) {
@@ -531,8 +552,10 @@ const MONTH_NUM = {};
   // timed ground duties from the grid (standby, training, …)
   for (const g of groundDuties) {
     const [sh, sm] = hm(g.dep), [eh, em] = hm(g.arr);
-    addEvent(dutyEmoji(g.code), new Date(year, monIdx, g.day, sh, sm), "Asia/Bangkok",
-             new Date(year, monIdx, g.day, eh, em), "Asia/Bangkok", "BKK");
+    const start = new Date(year, monIdx, g.day, sh, sm);
+    let end = new Date(year, monIdx, g.day, eh, em);
+    if (end <= start) end = new Date(year, monIdx, g.day + 1, eh, em);
+    addEvent(dutyEmoji(g.code), start, "Asia/Bangkok", end, "Asia/Bangkok", "BKK");
   }
 
   // duty rows with no grid legs at all (leave, meetings, …)

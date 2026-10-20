@@ -139,7 +139,7 @@
   <h1>💜 Purple Schedule Maker</h1>
   <p>แปลงไฟล์ PDF ตารางบินลูกเรือ → รูปภาพ PNG ตารางสีม่วง</p>
   <p>แจ้งปัญหา (Bug Report): Attach .pdf to MS Team 45481</p>
-  <p>Updated: 20 Oct 2026</p>
+  <p>Updated: 20 Oct 2026, 07:15 (Bangkok time)</p>
 </header>
 <main>
   <label id="drop" for="file">
@@ -268,7 +268,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "inline";
     for (const entries of Object.values(days)) {
       for (const entry of entries) {
         if (Array.isArray(entry) && typeof entry[0] === "string")
-          entry[0] = entry[0].replace(/\b((?:CHM|SB)\w*)\((\d{4})-null\)/, "☎️ $1($2)");
+          entry[0] = entry[0].replace(/\b((?:CHM|SB)\w*)\((\d{4})-null\)/, "$1($2)");
       }
     }
     return days;

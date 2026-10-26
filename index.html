@@ -197,12 +197,19 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "inline";
     // Aircraft qualifications can include suffixes such as `32W`, not only
     // digits. Let the embedded parser locate the metadata using a digit-only
     // shadow value, then restore the original qualification text below.
-    const qualMatch = normalizedText.match(/A\/C QUAL:\s*([A-Za-z0-9 ]+?)\s*RANK:/);
-    const parserText = qualMatch
-      ? normalizedText.replace(qualMatch[1], qualMatch[1].replace(/[A-Za-z]/g, ""))
+    // A/C qualifications can continue below the rank row (for example
+    // `320 32W`), so collect the whole block up to EFFECTIVE and omit RANK.
+    const qualMatch = normalizedText.match(/A\/C QUAL:\s*([\s\S]*?)\s*EFFECTIVE:/);
+    const rankMatch = normalizedText.match(/RANK:\s*(\S+)/);
+    const qualCodes = qualMatch
+      ? (qualMatch[1].replace(/RANK:\s*\S+/g, " ").match(/[A-Za-z0-9]+/g) || [])
+      : [];
+    const parserText = qualMatch && rankMatch
+      ? normalizedText.replace(qualMatch[0], `A/C QUAL: ${qualCodes
+          .map(code => code.replace(/[A-Za-z]/g, "")).filter(Boolean).join(" ")} RANK: ${rankMatch[1]} EFFECTIVE:`)
       : normalizedText;
     const parsed = originalParse(words, parserText);
-    if (qualMatch) parsed.meta.ac = qualMatch[1].trim().split(/\s+/).join(",");
+    if (qualCodes.length) parsed.meta.ac = qualCodes.join(",");
     const headers = words
       .filter(w => /^\d{1,2}(MON|TUE|WED|THU|FRI|SAT|SUN)$/.test(w.text))
       .sort((a, b) => a.x0 - b.x0);
